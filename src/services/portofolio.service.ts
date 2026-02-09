@@ -2,10 +2,14 @@ import {prisma} from "../lib/prisma";
 import { Portofolio } from "../types";
 
 const getAllPortofolios = async () => {
-    return await prisma.portofolio.findMany();
+    return await prisma.portofolio.findMany({
+        include: {
+            tags: true
+        }
+    });
 }
 
-const createPortofolio = async (data: Portofolio) => {
+const createPortofolio = async (data: Omit<Portofolio, 'id' | 'createdAt' | 'updatedAt'>) => {
     return await prisma.portofolio.create({
         data: {
             title: data.title,

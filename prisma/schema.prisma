@@ -24,7 +24,13 @@ model Portofolio {
 }
 
 model Tag {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
   portofolios Portofolio[]
+}
+
+model Admin {
+  id       Int    @id @default(autoincrement())
+  username String @unique
+  password String
 }
