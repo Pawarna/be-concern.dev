@@ -1,15 +1,17 @@
 import { prisma } from '../lib/prisma';
 import type * as Prisma from '../generated/prisma/models';
 
+import slugify from 'slugify';
+
 // Helper Function: Membuat Slug Unik
 const generateSlug = async (title: string): Promise<string> => {
   // 1. Bersihkan string (lowercase, ganti spasi jadi strip, hapus karakter aneh)
-  let slug = title
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/[\s_-]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+  let slug = slugify(title, {
+    lower: true,
+    strict: true,
+    remove: /[*+~.()'"!:@]/g,
+    replacement: '-'
+  });
 
   // 2. Cek apakah slug sudah ada di database
   let uniqueSlug = slug;

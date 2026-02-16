@@ -23,7 +23,7 @@ export const create = async (req: Request, res: Response) => {
 
     return sendSuccess(res, result, "Artikel berhasil dibuat", 201);
   } catch (error: any) {
-    return sendError(res, error.message, 500);
+    return sendError(res);
   }
 };
 
@@ -57,7 +57,7 @@ export const getPublicArtikels = async (req: Request, res: Response) => {
     };
     return sendSuccess(res, responsePayload, undefined, 200);
   } catch (error: any) {
-    return sendError(res, error.message, 500);
+    return sendError(res);
   }
 };
 
@@ -92,7 +92,7 @@ export const getAdminArtikels = async (req: Request, res: Response) => {
     };
     return sendSuccess(res, responsePayload, undefined, 200);
   } catch (error: any) {
-    return sendError(res, error.message, 500);
+    return sendError(res);
   }
 };
 
@@ -141,7 +141,7 @@ export const update = async (req: Request, res: Response) => {
 
     return sendSuccess(res, result, "Artikel berhasil diupdate", 200);
   } catch (error: any) {
-    return sendError(res, error.message, 500);
+    return sendError(res);
   }
 };
 
@@ -164,7 +164,7 @@ export const patchStatus = async (req: Request, res: Response) => {
       200,
     );
   } catch (error: any) {
-    return sendError(res, error.message, 500);
+    return sendError(res);
   }
 };
 
@@ -193,6 +193,6 @@ export const remove = async (req: Request, res: Response) => {
 
     return sendSuccess(res, null, "Artikel berhasil dihapus", 200);
   } catch (error: any) {
-    return sendError(res, error.message, 500);
+    return sendError(res);
   }
 };

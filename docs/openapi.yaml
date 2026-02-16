@@ -261,6 +261,40 @@ paths:
               schema:
                 $ref: '#/components/schemas/PortofolioResponse'
 
+  /category:
+    get:
+      tags: [Category]
+      summary: Get all categories
+      responses:
+        200:
+          description: List categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+    post:
+      tags: [Category]
+      summary: Create category (admin)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                slug: { type: string }
+      responses:
+        201:
+          description: Category created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryResponse'
+
   /upload:
     post:
       tags: [Upload]
@@ -383,3 +417,21 @@ components:
         message: { type: string }
         result:
           $ref: '#/components/schemas/Portofolio'
+
+    Category:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        slug: { type: string }
+        _count:
+          type: object
+          properties:
+            artikels: { type: integer }
+    CategoryResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        message: { type: string }
+        result:
+          $ref: '#/components/schemas/Category'
