@@ -44,9 +44,16 @@ export const createArtikelSchema = z.object({
     })
 });
 
-export const getArtikelSchema = z.object({
+export const getArtikelBySlugSchema = z.object({
     params: z.object({
         slug: z.string().min(1, "Slug diperlukan")
+
+    })
+})
+
+export const getArtikelByIdSchema = z.object({
+    params: z.object({
+        id: z.coerce.number().min(1, "Id diperlukan")
     })
 })
 

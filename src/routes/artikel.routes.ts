@@ -4,7 +4,8 @@ import { authenticateToken } from "../middlewares/auth.middleware";
 import { validateRequest } from "../middlewares/validate.middleware";
 import { upload } from "../middlewares/upload.middleware";
 import {
-    getArtikelSchema,
+    getArtikelBySlugSchema,
+    getArtikelByIdSchema,
     updateArtikelSchema,
     patchStatusSchema,
     createArtikelSchema
@@ -14,10 +15,12 @@ const router = Router();
 
 // Public routes
 router.get("/", artikelController.getPublicArtikels);
-router.get("/slug/:slug", validateRequest(getArtikelSchema), artikelController.getbySlug);
+router.get("/slug/:slug", validateRequest(getArtikelBySlugSchema), artikelController.getbySlug);
 
 // Admin routes (protected)
 router.get("/admin", authenticateToken, artikelController.getAdminArtikels);
+router.get('/:id', validateRequest(getArtikelByIdSchema), artikelController.getbyId);
+
 router.post("/", authenticateToken, upload.single('file'), validateRequest(createArtikelSchema), artikelController.create);
 router.patch("/:id/status", authenticateToken, validateRequest(patchStatusSchema), artikelController.patchStatus);
 router.put("/:id", authenticateToken, upload.single('file'), validateRequest(updateArtikelSchema), artikelController.update);

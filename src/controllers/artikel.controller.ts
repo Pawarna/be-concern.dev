@@ -11,7 +11,7 @@ export const create = async (req: Request, res: Response) => {
   try {
     const payload = req.body as CreateArtikelDTO;
 
-    const thumbnail = req.file ? `uploads/${req.file.filename}` : "";
+    const thumbnail = req.file ? `/uploads/${req.file.filename}` : "";
 
     const result = await artikelService.createArtikel({
       ...payload,
@@ -22,7 +22,8 @@ export const create = async (req: Request, res: Response) => {
       categoryId: payload.categoryId ? Number(payload.categoryId) : null
     });
 
-    if (result.thumbnail) formatImageUrl(req, result.thumbnail);
+    const formattedCreatedThumb = formatImageUrl(req, result.thumbnail);
+    if (formattedCreatedThumb) result.thumbnail = formattedCreatedThumb;
 
     return sendSuccess(res, {...result}, "Artikel berhasil dibuat", 201);
   } catch (error: any) {
@@ -61,9 +62,10 @@ export const getPublicArtikels = async (req: Request, res: Response) => {
 
     // format thumbnail to full url
     responsePayload.items = responsePayload.items.map((artikel) => {
+      const formatted = artikel.thumbnail ? formatImageUrl(req, artikel.thumbnail) : null;
       return {
         ...artikel,
-        thumbnail: artikel.thumbnail ? formatImageUrl(req, artikel.thumbnail) : null,
+        thumbnail: formatted,
       } as any;
     });
 
@@ -79,7 +81,7 @@ export const getAdminArtikels = async (req: Request, res: Response) => {
     const authorId = (req as any).user?.id || 1;
     const numericSkip = skip ? Number(skip) : undefined;
     const numericTake = take ? Number(take) : undefined;
-    const artikels = await artikelService.getAdminArtikels(authorId, {
+    const artikels = await artikelService.getAdminArtikels(Number(authorId), {
       skip: numericSkip,
       take: numericTake,
       search: typeof search === "string" ? search : undefined,
@@ -105,9 +107,10 @@ export const getAdminArtikels = async (req: Request, res: Response) => {
 
     // format thumbnail to full url
     responsePayload.items = responsePayload.items.map((artikel) => {
+      const formatted = artikel.thumbnail ? formatImageUrl(req, artikel.thumbnail) : null;
       return {
         ...artikel,
-        thumbnail: artikel.thumbnail ? formatImageUrl(req, artikel.thumbnail) : null,
+        thumbnail: formatted,
       } as any;
     });
 
@@ -127,7 +130,30 @@ export const getbySlug = async (req: Request, res: Response) => {
       return sendError(res, "Artikel tidak ditemukan", 404);
     }
 
-    if (artikel.thumbnail) formatImageUrl(req, artikel.thumbnail);
+    if (artikel.thumbnail) {
+      const formatted = formatImageUrl(req, artikel.thumbnail);
+      if (formatted) artikel.thumbnail = formatted;
+    }
+
+    return sendSuccess(res, artikel, undefined, 200);
+  } catch (error: any) {
+    return sendError(res, error.message, undefined);
+  }
+};
+
+export const getbyId = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+    const artikel = await artikelService.getArtikelById(id);
+
+    if (!artikel) {
+      return sendError(res, "Artikel tidak ditemukan", 404);
+    }
+
+    if (artikel.thumbnail) {
+      const formatted = formatImageUrl(req, artikel.thumbnail);
+      if (formatted) artikel.thumbnail = formatted;
+    }
 
     return sendSuccess(res, artikel, undefined, 200);
   } catch (error: any) {
@@ -153,7 +179,11 @@ export const update = async (req: Request, res: Response) => {
           "../../uploads",
           currentArtikel.thumbnail,
         );
-        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+        try {
+          if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+        } catch (err) {
+          console.error('Failed to remove old thumbnail:', err);
+        }
       }
     }
 
@@ -162,11 +192,13 @@ export const update = async (req: Request, res: Response) => {
       thumbnail: thumbnailPath,
     });
 
-    if (result.thumbnail) formatImageUrl(req, result.thumbnail);
+    const formattedUpdatedThumb = formatImageUrl(req, result.thumbnail);
+    if (formattedUpdatedThumb) result.thumbnail = formattedUpdatedThumb;
 
     return sendSuccess(res, result, "Artikel berhasil diupdate", 200);
   } catch (error: any) {
-    return sendError(res);
+    console.error(error);
+    return sendError(res, 'Internal Server Error', 500, { stack: error?.stack });
   }
 };
 
@@ -182,7 +214,8 @@ export const patchStatus = async (req: Request, res: Response) => {
 
     const result = await artikelService.updateStatus(id, status);
 
-    if (result.thumbnail) formatImageUrl(req, result.thumbnail);
+    const formattedPatchedThumb = formatImageUrl(req, result.thumbnail);
+    if (formattedPatchedThumb) result.thumbnail = formattedPatchedThumb;
 
     return sendSuccess(
       res,

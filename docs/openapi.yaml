@@ -297,6 +297,7 @@ paths:
 
   /upload:
     post:
+      security: [{ bearerAuth: [] }]
       tags: [Upload]
       summary: Upload file
       requestBody:
@@ -310,6 +311,15 @@ paths:
                   type: string
                   format: binary
       responses:
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  message: { type: string }
         201:
           description: File uploaded
           content:
@@ -353,6 +363,28 @@ paths:
                     type: object
                     properties:
                       token: { type: string }
+
+  /dashboard/stats:
+    get:
+      tags: [Dashboard]
+      summary: Get dashboard statistics (admin)
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Dashboard statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardStatsResponse'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  message: { type: string }
 
 components:
   securitySchemes:
@@ -435,3 +467,33 @@ components:
         message: { type: string }
         result:
           $ref: '#/components/schemas/Category'
+    DashboardStats:
+      type: object
+      properties:
+        totalArtikels: { type: integer }
+        totalPublished: { type: integer }
+        totalCategories: { type: integer }
+        recentArticles:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: integer }
+              title: { type: string }
+              slug: { type: string }
+              createdAt: { type: string, format: date-time }
+              author:
+                type: object
+                properties:
+                  username: { type: string }
+              category:
+                type: object
+                properties:
+                  name: { type: string }
+    DashboardStatsResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        message: { type: string }
+        result:
+          $ref: '#/components/schemas/DashboardStats'

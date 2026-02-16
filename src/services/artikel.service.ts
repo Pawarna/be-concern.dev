@@ -159,17 +159,22 @@ export const updateArtikel = async (id: number, data: Prisma.ArtikelUncheckedUpd
   if (!existing) throw new Error('Artikel tidak ditemukan');
 
   // Di sini saya buat slug ikut berubah jika title dikirim.
-  let newSlug = data.slug;
-  if (data.title && typeof data.title === 'string' && !data.slug) {
-     // Cek dulu apakah slug perlu diganti (logic opsional)
-     newSlug = await generateSlug(data.title);
+  // Determine slug behaviour:
+  // - If client explicitly provided a non-empty `slug`, use it.
+  // - Else if `title` is provided and different from existing title, generate a new unique slug.
+  // - Otherwise, don't change slug (leave as-is).
+  let newSlug: string | undefined;
+  if (typeof data.slug === 'string' && data.slug.trim() !== '') {
+    newSlug = data.slug as string;
+  } else if (typeof data.title === 'string' && data.title !== existing.title) {
+    newSlug = await generateSlug(data.title as string);
   }
 
   return await prisma.artikel.update({
     where: { id },
     data: {
       ...data,
-      ...(newSlug && { slug: newSlug }), // Update slug hanya jika ada judul baru
+      ...(newSlug ? { slug: newSlug } : {}), // Update slug only when we determined a new one
       updatedAt: new Date()
     },
     include: {
