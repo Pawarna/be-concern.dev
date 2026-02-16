@@ -1,0 +1,385 @@
+openapi: 3.0.3
+info:
+  title: Concern API
+  version: 1.0.0
+  description: API documentation for all routes in the project
+servers:
+  - url: http://localhost:3000/api
+
+paths:
+  /artikel:
+    get:
+      tags: [Artikel]
+      summary: Get public artikels (paginated)
+      parameters:
+        - in: query
+          name: skip
+          schema: { type: integer, minimum: 0 }
+        - in: query
+          name: take
+          schema: { type: integer, minimum: 1 }
+        - in: query
+          name: search
+          schema: { type: string }
+        - in: query
+          name: sortBy
+          schema: { type: string, default: createdAt }
+        - in: query
+          name: order
+          schema: { type: string, enum: [asc, desc], default: desc }
+      responses:
+        200:
+          description: List artikel dengan meta pagination
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  message: { type: string }
+                  result:
+                    type: object
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: '#/components/schemas/Artikel' }
+                      meta:
+                        $ref: '#/components/schemas/PaginationMeta'
+    post:
+      tags: [Artikel]
+      summary: Create artikel (admin)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                title:
+                  type: string
+                slug:
+                  type: string
+                content:
+                  type: string
+                status:
+                  type: string
+                  enum: [DRAFT, PUBLISHED]
+                categoryId:
+                  type: integer
+      responses:
+        201:
+          description: Artikel created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArtikelResponse'
+
+  /artikel/slug/{slug}:
+    get:
+      tags: [Artikel]
+      summary: Get artikel by slug
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema: { type: string }
+      responses:
+        200:
+          description: Artikel detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArtikelResponse'
+
+  /artikel/admin:
+    get:
+      tags: [Artikel]
+      summary: Get admin artikels (paginated)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: skip
+          schema: { type: integer, minimum: 0 }
+        - in: query
+          name: take
+          schema: { type: integer, minimum: 1 }
+        - in: query
+          name: search
+          schema: { type: string }
+        - in: query
+          name: sortBy
+          schema: { type: string, default: createdAt }
+        - in: query
+          name: order
+          schema: { type: string, enum: [asc, desc], default: desc }
+      responses:
+        200:
+          description: List artikel admin dengan meta pagination
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  message: { type: string }
+                  result:
+                    type: object
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: '#/components/schemas/Artikel' }
+                      meta:
+                        $ref: '#/components/schemas/PaginationMeta'
+
+  /artikel/{id}:
+    put:
+      tags: [Artikel]
+      summary: Update artikel (admin)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                title:
+                  type: string
+                slug:
+                  type: string
+                content:
+                  type: string
+                status:
+                  type: string
+                  enum: [DRAFT, PUBLISHED]
+                categoryId:
+                  type: integer
+      responses:
+        200:
+          description: Artikel updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArtikelResponse'
+    delete:
+      tags: [Artikel]
+      summary: Delete artikel (admin)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        200:
+          description: Artikel deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  message: { type: string }
+
+  /artikel/{id}/status:
+    patch:
+      tags: [Artikel]
+      summary: Patch artikel status (admin)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [DRAFT, PUBLISHED]
+      responses:
+        200:
+          description: Artikel status updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArtikelResponse'
+
+  /portofolio:
+    get:
+      tags: [Portofolio]
+      summary: Get all portofolio
+      responses:
+        200:
+          description: List portofolio
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Portofolio' }
+    post:
+      tags: [Portofolio]
+      summary: Create portofolio (admin)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                title:
+                  type: string
+                description:
+                  type: string
+                tags:
+                  type: string
+      responses:
+        201:
+          description: Portofolio created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortofolioResponse'
+
+  /upload:
+    post:
+      tags: [Upload]
+      summary: Upload file
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        201:
+          description: File uploaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  message: { type: string }
+                  result:
+                    type: object
+                    properties:
+                      url: { type: string }
+
+  /login:
+    post:
+      tags: [Auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        200:
+          description: Login success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  message: { type: string }
+                  result:
+                    type: object
+                    properties:
+                      token: { type: string }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Artikel:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        slug: { type: string }
+        content: { type: object }
+        thumbnail: { type: string, nullable: true }
+        status: { type: string, enum: [DRAFT, PUBLISHED] }
+        categoryId: { type: integer, nullable: true }
+        authorId: { type: integer }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        author:
+          type: object
+          properties:
+            username: { type: string }
+            email: { type: string }
+        category:
+          type: object
+          properties:
+            id: { type: integer }
+            name: { type: string }
+    ArtikelResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        message: { type: string }
+        result:
+          $ref: '#/components/schemas/Artikel'
+    PaginationMeta:
+      type: object
+      properties:
+        total: { type: integer }
+        skip: { type: integer }
+        take: { type: integer }
+    Portofolio:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        description: { type: string }
+        imageUrl: { type: string }
+        tags:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+    PortofolioResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        message: { type: string }
+        result:
+          $ref: '#/components/schemas/Portofolio'
