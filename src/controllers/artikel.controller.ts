@@ -5,6 +5,7 @@ import fs from "fs";
 import { CreateArtikelDTO, UpdateArtikelDTO } from "../schemas/artikel.schema";
 import * as artikelService from "../services/artikel.service";
 import { sendSuccess, sendError } from "../utils/response";
+import { formatImageUrl } from "../utils/urlHelper";
 
 export const create = async (req: Request, res: Response) => {
   try {
@@ -21,7 +22,9 @@ export const create = async (req: Request, res: Response) => {
       categoryId: payload.categoryId ? Number(payload.categoryId) : null
     });
 
-    return sendSuccess(res, result, "Artikel berhasil dibuat", 201);
+    if (result.thumbnail) formatImageUrl(req, result.thumbnail);
+
+    return sendSuccess(res, {...result}, "Artikel berhasil dibuat", 201);
   } catch (error: any) {
     return sendError(res);
   }
@@ -55,6 +58,15 @@ export const getPublicArtikels = async (req: Request, res: Response) => {
         take: numericTake,
       },
     };
+
+    // format thumbnail to full url
+    responsePayload.items = responsePayload.items.map((artikel) => {
+      return {
+        ...artikel,
+        thumbnail: artikel.thumbnail ? formatImageUrl(req, artikel.thumbnail) : null,
+      } as any;
+    });
+
     return sendSuccess(res, responsePayload, undefined, 200);
   } catch (error: any) {
     return sendError(res);
@@ -90,6 +102,15 @@ export const getAdminArtikels = async (req: Request, res: Response) => {
         take: numericTake,
       },
     };
+
+    // format thumbnail to full url
+    responsePayload.items = responsePayload.items.map((artikel) => {
+      return {
+        ...artikel,
+        thumbnail: artikel.thumbnail ? formatImageUrl(req, artikel.thumbnail) : null,
+      } as any;
+    });
+
     return sendSuccess(res, responsePayload, undefined, 200);
   } catch (error: any) {
     return sendError(res);
@@ -105,6 +126,8 @@ export const getbySlug = async (req: Request, res: Response) => {
     if (!artikel) {
       return sendError(res, "Artikel tidak ditemukan", 404);
     }
+
+    if (artikel.thumbnail) formatImageUrl(req, artikel.thumbnail);
 
     return sendSuccess(res, artikel, undefined, 200);
   } catch (error: any) {
@@ -139,6 +162,8 @@ export const update = async (req: Request, res: Response) => {
       thumbnail: thumbnailPath,
     });
 
+    if (result.thumbnail) formatImageUrl(req, result.thumbnail);
+
     return sendSuccess(res, result, "Artikel berhasil diupdate", 200);
   } catch (error: any) {
     return sendError(res);
@@ -156,6 +181,8 @@ export const patchStatus = async (req: Request, res: Response) => {
     }
 
     const result = await artikelService.updateStatus(id, status);
+
+    if (result.thumbnail) formatImageUrl(req, result.thumbnail);
 
     return sendSuccess(
       res,
