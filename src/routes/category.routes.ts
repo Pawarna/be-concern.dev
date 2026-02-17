@@ -9,5 +9,7 @@ const router = Router();
 router.get('/', categoryController.index);
 
 router.post('/', authenticateToken, validateRequest(categorySchema), categoryController.store);
+router.put('/:id', authenticateToken, validateRequest(categorySchema), categoryController.update);
+router.delete('/:id', authenticateToken, categoryController.remove);
 
 export default router;

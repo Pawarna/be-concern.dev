@@ -136,6 +136,30 @@ paths:
                         $ref: '#/components/schemas/PaginationMeta'
 
   /artikel/{id}:
+    get:
+      tags: [Artikel]
+      summary: Get artikel by id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        200:
+          description: Artikel detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArtikelResponse'
+        404:
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  message: { type: string }
     put:
       tags: [Artikel]
       summary: Update artikel (admin)

@@ -1,4 +1,3 @@
-import { id } from "zod/locales";
 import { prisma } from "../lib/prisma";
 import slugify from "slugify";
 
@@ -19,6 +18,14 @@ export const getCategories = async () => {
         orderBy: { name: 'asc' }
     });
 };
+
+export const updateCategory = async (id: number, name: string) => {
+    const slug = slugify(name, { lower: true });
+    return await prisma.category.update({
+        where: { id },
+        data: { name, slug }
+    });
+}
 
 export const deleteCategory = async (id: number) => {
     return await prisma.category.delete({ where: {id} });
