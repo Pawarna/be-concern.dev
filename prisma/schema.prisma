@@ -18,6 +18,7 @@ model Portofolio {
   title       String
   description String
   imageUrl    String
+  link        String
   tags        Tag[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

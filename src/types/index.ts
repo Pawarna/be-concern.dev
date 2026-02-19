@@ -3,6 +3,7 @@ export interface Portofolio {
     title: string;
     description: string;
     imageUrl: string;
+    link: string;
     tags: Tag[];
     createdAt: Date;
     updatedAt: Date;

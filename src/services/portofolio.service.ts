@@ -9,12 +9,23 @@ const getAllPortofolios = async () => {
     });
 }
 
+const getPortofolioById = async (id: number) => {
+    return await prisma.portofolio.findFirst({
+        where: {
+            id
+        },
+        include: {
+            tags: true
+        }
+    })
+}
 const createPortofolio = async (data: Omit<Portofolio, 'id' | 'createdAt' | 'updatedAt'>) => {
     return await prisma.portofolio.create({
         data: {
             title: data.title,
             description: data.description,
             imageUrl: data.imageUrl,
+            link: data.link,
             tags: {
                 connectOrCreate: data.tags.map(tag => ({
                     where: { name: tag.name },
@@ -28,8 +39,42 @@ const createPortofolio = async (data: Omit<Portofolio, 'id' | 'createdAt' | 'upd
     });
 }
 
+const deleteProtofolio = async (id: number) => {
+    return await prisma.portofolio.delete({
+        where: {
+            id
+        }
+    })
+}
+
+const updatePortofolio = async (id: number, data: Omit<Portofolio, 'id' | 'createdAt' | 'updatedAt'>) => {
+    return await prisma.portofolio.update({
+        where: {
+            id
+        },
+        data: {
+            title: data.title,
+            description: data.description,
+            imageUrl: data.imageUrl,
+            link: data.link,
+            tags: {
+                connectOrCreate: data.tags.map(tag => ({
+                    where: { name: tag.name },
+                    create: { name: tag.name }
+                }))
+            }
+        },
+        include: {
+            tags: true
+        }
+    })
+}
+
 export default {
     getAllPortofolios,
-    createPortofolio
+    getPortofolioById,
+    createPortofolio,
+    updatePortofolio,
+    deleteProtofolio
 };
     
