@@ -1,19 +1,16 @@
 import { Response, Request } from "express";
 import protoService from "../services/portofolio.service";
+import { uploadToSupabase } from "../middlewares/upload.middleware";
+const BUCKET_NAME = "uploads";
+
 
 import { sendSuccess, sendError } from "../utils/response";
-import { formatImageUrl } from "../utils/urlHelper";
 
 export const getProtofolios = async (req: Request, res: Response) => {
     try {
         const data = await protoService.getAllPortofolios();
-
-        const dataWithFullUrl = data.map(item => ({
-      ...item,
-      imageUrl: item.imageUrl ? formatImageUrl(req, item.imageUrl) : null
-    }));
         
-        return sendSuccess(res, dataWithFullUrl, "Portofolios fetched successfully");
+        return sendSuccess(res, data, "Portofolios fetched successfully");
     } catch (error) {
         console.error("Error fetching portofolios:", error);
         return sendError(res, "Failed to fetch portofolios", 500, error);
@@ -35,13 +32,13 @@ export const createPortofolio = async (req: Request, res: Response) => {
         const portofolioData = {
             title,
             description,
-            imageUrl: `/uploads/${req.file?.filename}`,
+            imageUrl: req.file? await uploadToSupabase(req.file, BUCKET_NAME) : "",
             link,
             tags: tagObjects
         }
 
         const portofolio = await protoService.createPortofolio(portofolioData);
-        return sendSuccess(res, {...portofolio, imageUrl: formatImageUrl(req, portofolio.imageUrl)}, "Portofolio created successfully", 201);
+        return sendSuccess(res, portofolio, "Portofolio created successfully", 201);
     } catch (error) {
         console.error("Error creating portofolio:", error);
         return sendError(res, "Failed to create portofolio", 500, error);
@@ -62,7 +59,7 @@ export const updatePortofolio = async (req: Request, res: Response) => {
         let updatedImageUrl = existPortofolio.imageUrl
 
         if (req.file){
-            updatedImageUrl = `/uploads/${req.file.filename}`
+            updatedImageUrl = await uploadToSupabase(req.file, BUCKET_NAME);
         }
 
         const parsedTags = typeof tags === 'string' ? JSON.parse(tags): tags;
@@ -79,9 +76,10 @@ export const updatePortofolio = async (req: Request, res: Response) => {
 
         const portofolio = await protoService.updatePortofolio(String(id), portofolioData);
 
-        return sendSuccess(res, {...portofolio, imageUrl: formatImageUrl(req, portofolio.imageUrl)}, 'Portofolio berhasil diupdate' )
+        return sendSuccess(res, portofolio, 'Portofolio berhasil diupdate' )
     } catch (error) {
-        
+        console.error("Error updating portofolio:", error);
+        return sendError(res, "Failed to update portofolio", 500, error);
     }
 }
 

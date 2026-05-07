@@ -1,17 +1,17 @@
 import { Request, Response } from "express";
-import path from "node:path";
-import fs from "fs";
 
 import { CreateArtikelDTO, UpdateArtikelDTO } from "../schemas/artikel.schema";
 import * as artikelService from "../services/artikel.service";
 import { sendSuccess, sendError } from "../utils/response";
-import { formatImageUrl } from "../utils/urlHelper";
+import { uploadToSupabase } from "../middlewares/upload.middleware";
+
+const BUCKET_NAME = "uploads";
 
 export const create = async (req: Request, res: Response) => {
   try {
     const payload = req.body as CreateArtikelDTO;
 
-    const thumbnail = req.file ? `/uploads/${req.file.filename}` : "";
+    const thumbnail = req.file ? await uploadToSupabase(req.file, BUCKET_NAME) : "";
 
     const result = await artikelService.createArtikel({
       ...payload,
@@ -21,10 +21,7 @@ export const create = async (req: Request, res: Response) => {
       status: payload.status || "DRAFT",
       categoryId: payload.categoryId ? payload.categoryId : null
     });
-
-    const formattedCreatedThumb = formatImageUrl(req, result.thumbnail);
-    if (formattedCreatedThumb) result.thumbnail = formattedCreatedThumb;
-
+    
     return sendSuccess(res, {...result}, "Artikel berhasil dibuat", 201);
   } catch (error: any) {
     return sendError(res);
@@ -60,14 +57,7 @@ export const getPublicArtikels = async (req: Request, res: Response) => {
       },
     };
 
-    // format thumbnail to full url
-    responsePayload.items = responsePayload.items.map((artikel) => {
-      const formatted = artikel.thumbnail ? formatImageUrl(req, artikel.thumbnail) : null;
-      return {
-        ...artikel,
-        thumbnail: formatted,
-      } as any;
-    });
+    
 
     return sendSuccess(res, responsePayload, undefined, 200);
   } catch (error: any) {
@@ -105,14 +95,6 @@ export const getAdminArtikels = async (req: Request, res: Response) => {
       },
     };
 
-    // format thumbnail to full url
-    responsePayload.items = responsePayload.items.map((artikel) => {
-      const formatted = artikel.thumbnail ? formatImageUrl(req, artikel.thumbnail) : null;
-      return {
-        ...artikel,
-        thumbnail: formatted,
-      } as any;
-    });
 
     return sendSuccess(res, responsePayload, undefined, 200);
   } catch (error: any) {
@@ -130,10 +112,6 @@ export const getbySlug = async (req: Request, res: Response) => {
       return sendError(res, "Artikel tidak ditemukan", 404);
     }
 
-    if (artikel.thumbnail) {
-      const formatted = formatImageUrl(req, artikel.thumbnail);
-      if (formatted) artikel.thumbnail = formatted;
-    }
 
     return sendSuccess(res, artikel, undefined, 200);
   } catch (error: any) {
@@ -150,11 +128,6 @@ export const getbyId = async (req: Request, res: Response) => {
       return sendError(res, "Artikel tidak ditemukan", 404);
     }
 
-    if (artikel.thumbnail) {
-      const formatted = formatImageUrl(req, artikel.thumbnail);
-      if (formatted) artikel.thumbnail = formatted;
-    }
-
     return sendSuccess(res, artikel, undefined, 200);
   } catch (error: any) {
     return sendError(res, error.message, undefined);
@@ -169,31 +142,9 @@ export const update = async (req: Request, res: Response) => {
     const currentArtikel = await artikelService.getArtikelById(id);
     if (!currentArtikel) return sendError(res, "Not Found", 404);
 
-    let thumbnailPath = currentArtikel.thumbnail;
-    if (req.file) {
-      thumbnailPath = `/uploads/${req.file.filename}`;
+    
+    const result = await artikelService.updateArtikel(id, payload);
 
-      if (currentArtikel.thumbnail) {
-        const oldPath = path.join(
-          __dirname,
-          "../../uploads",
-          currentArtikel.thumbnail,
-        );
-        try {
-          if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-        } catch (err) {
-          console.error('Failed to remove old thumbnail:', err);
-        }
-      }
-    }
-
-    const result = await artikelService.updateArtikel(id, {
-      ...payload,
-      thumbnail: thumbnailPath,
-    });
-
-    const formattedUpdatedThumb = formatImageUrl(req, result.thumbnail);
-    if (formattedUpdatedThumb) result.thumbnail = formattedUpdatedThumb;
 
     return sendSuccess(res, result, "Artikel berhasil diupdate", 200);
   } catch (error: any) {
@@ -213,9 +164,6 @@ export const patchStatus = async (req: Request, res: Response) => {
     }
 
     const result = await artikelService.updateStatus(id, status);
-
-    const formattedPatchedThumb = formatImageUrl(req, result.thumbnail);
-    if (formattedPatchedThumb) result.thumbnail = formattedPatchedThumb;
 
     return sendSuccess(
       res,
@@ -238,16 +186,6 @@ export const remove = async (req: Request, res: Response) => {
       return sendError(res, "Artikel tidak ditemukan", 404);
     }
 
-    if (artikel.thumbnail) {
-      const thumbnailPath = path.join(
-        __dirname,
-        "../../uploads",
-        artikel.thumbnail,
-      );
-      if (fs.existsSync(thumbnailPath)) {
-        fs.unlinkSync(thumbnailPath);
-      }
-    }
 
     await artikelService.deleteArtikel(id);
 
