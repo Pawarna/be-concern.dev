@@ -54,7 +54,7 @@ export const updatePortofolio = async (req: Request, res: Response) => {
 
     try {
 
-        const existPortofolio = await protoService.getPortofolioById(Number(id))
+        const existPortofolio = await protoService.getPortofolioById(String(id))
         if (!existPortofolio){
             return await sendError(res, "Portofolio not found", 404);
         }
@@ -77,7 +77,7 @@ export const updatePortofolio = async (req: Request, res: Response) => {
             tags: tagObjects
         }
 
-        const portofolio = await protoService.updatePortofolio(Number(id), portofolioData);
+        const portofolio = await protoService.updatePortofolio(String(id), portofolioData);
 
         return sendSuccess(res, {...portofolio, imageUrl: formatImageUrl(req, portofolio.imageUrl)}, 'Portofolio berhasil diupdate' )
     } catch (error) {
@@ -89,15 +89,15 @@ export const deleteProtofolio = async (req: Request, res: Response) => {
     const {id} = req.params;
 
     try {
-        const portofolio = await protoService.getPortofolioById(Number(id));
+        const portofolio = await protoService.getPortofolioById(String(id));
 
         if (!portofolio){
             return sendError(res, `Portofolio ID ${id} tidak ditemukan`, 404)
         }
 
-        await protoService.deleteProtofolio(Number(id));
+        await protoService.deleteProtofolio(String(id));
 
-        return sendSuccess(res, undefined, `Delete portofolio ID `)
+        return sendSuccess(res, undefined, `Delete portofolio ID ${id} berhasil`, 200)
     } catch (error) {
         console.error(error);
         sendError(res);

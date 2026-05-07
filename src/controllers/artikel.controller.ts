@@ -19,7 +19,7 @@ export const create = async (req: Request, res: Response) => {
       slug: payload.slug || "",
       authorId: (req as any).user?.id || 1,
       status: payload.status || "DRAFT",
-      categoryId: payload.categoryId ? Number(payload.categoryId) : null
+      categoryId: payload.categoryId ? payload.categoryId : null
     });
 
     const formattedCreatedThumb = formatImageUrl(req, result.thumbnail);
@@ -81,7 +81,7 @@ export const getAdminArtikels = async (req: Request, res: Response) => {
     const authorId = (req as any).user?.id || 1;
     const numericSkip = skip ? Number(skip) : undefined;
     const numericTake = take ? Number(take) : undefined;
-    const artikels = await artikelService.getAdminArtikels(Number(authorId), {
+    const artikels = await artikelService.getAdminArtikels(authorId, {
       skip: numericSkip,
       take: numericTake,
       search: typeof search === "string" ? search : undefined,
@@ -143,7 +143,7 @@ export const getbySlug = async (req: Request, res: Response) => {
 
 export const getbyId = async (req: Request, res: Response) => {
   try {
-    const id = Number(req.params.id);
+    const id = String(req.params.id);
     const artikel = await artikelService.getArtikelById(id);
 
     if (!artikel) {
@@ -163,7 +163,7 @@ export const getbyId = async (req: Request, res: Response) => {
 
 export const update = async (req: Request, res: Response) => {
   try {
-    const id = Number(req.params.id);
+    const id = String(req.params.id);
     const payload = req.body as UpdateArtikelDTO;
 
     const currentArtikel = await artikelService.getArtikelById(id);
@@ -204,7 +204,7 @@ export const update = async (req: Request, res: Response) => {
 
 export const patchStatus = async (req: Request, res: Response) => {
   try {
-    const id = Number(req.params.id);
+    const id = String(req.params.id);
     const { status } = req.body;
 
     const existing = await artikelService.getArtikelById(id);
@@ -230,7 +230,7 @@ export const patchStatus = async (req: Request, res: Response) => {
 
 export const remove = async (req: Request, res: Response) => {
   try {
-    const id = Number(req.params.id);
+    const id = String(req.params.id);
 
     const artikel = await artikelService.getArtikelById(id);
 

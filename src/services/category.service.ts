@@ -19,7 +19,7 @@ export const getCategories = async () => {
     });
 };
 
-export const updateCategory = async (id: number, name: string) => {
+export const updateCategory = async (id: string, name: string) => {
     const slug = slugify(name, { lower: true });
     return await prisma.category.update({
         where: { id },
@@ -27,6 +27,6 @@ export const updateCategory = async (id: number, name: string) => {
     });
 }
 
-export const deleteCategory = async (id: number) => {
+export const deleteCategory = async (id: string) => {
     return await prisma.category.delete({ where: {id} });
 };

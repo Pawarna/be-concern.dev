@@ -25,7 +25,7 @@ export const update = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         const { name } = req.body;
-        const category = await categoryService.updateCategory(Number(id), name);
+        const category = await categoryService.updateCategory(String(id), name);
         return sendSuccess(res, category);
     } catch (error) {
         return sendError(res)
@@ -35,7 +35,7 @@ export const update = async (req: Request, res: Response) => {
 export const remove = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        await categoryService.deleteCategory(Number(id));
+        await categoryService.deleteCategory(String(id));
         return sendSuccess(res, null, "Category deleted successfully");
     } catch (error) {
         return sendError(res)

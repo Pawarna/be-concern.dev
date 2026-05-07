@@ -37,9 +37,10 @@ export const createArtikelSchema = z.object({
             error: () => ({ message: "Status harus DRAFT atau PUBLISHED" })
         }),
 
+        //category id string uuid or null, if empty string or null then set to null
         categoryId: z.preprocess(
-            (val) => (val === '' || val === '0' || val === null ? undefined : val),
-            z.coerce.number().int().positive().optional()
+            (val) => (val === "" || val === null ? null : val),
+            z.string().optional()
         )
     })
 });
@@ -53,19 +54,19 @@ export const getArtikelBySlugSchema = z.object({
 
 export const getArtikelByIdSchema = z.object({
     params: z.object({
-        id: z.coerce.number().min(1, "Id diperlukan")
+        id: z.coerce.string().min(1, "Id diperlukan")
     })
 })
 
 export const updateArtikelSchema = z.object({
     params: z.object({
-        id: z.coerce.number().min(1, "ID tidak valid")
+        id: z.coerce.string().min(1, "ID tidak valid")
     }),
     body: z.object({
         title: z.string().min(5).optional(),
         categoryId: z.preprocess(
-            (val) => (val === "" || val === null ? undefined : val),
-            z.coerce.number().optional()
+            (val) => (val === "" || val === null ? null : val),
+            z.string().optional()
         ),
         status: z.enum(['DRAFT', 'PUBLISHED']).optional(),
         content: z.string().transform((str, ctx) => {
@@ -83,7 +84,7 @@ export const updateArtikelSchema = z.object({
 
 export const patchStatusSchema = z.object({
     params: z.object({
-        id: z.coerce.number().min(1, "ID tidak valid")
+        id: z.coerce.string().min(1, "ID tidak valid")
     }),
     body: z.object({
         status: z.enum(['DRAFT', 'PUBLISHED'], {

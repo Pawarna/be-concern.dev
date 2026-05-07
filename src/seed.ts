@@ -56,7 +56,8 @@ async function main() {
             where: { name: tagName },
             create: { name: tagName }
           }))
-        }
+        },
+        link: 'google.com'
       },
 
     })

@@ -84,7 +84,7 @@ export const getPublicArtikels = async (params: {
   });
 };
 
-export const getAdminArtikels = async (authorId: number, params: {
+export const getAdminArtikels = async (authorId: string, params: {
   skip?: number;
   take?: number;
   search?: string; // Fitur pencarian judul
@@ -135,7 +135,7 @@ export const getArtikelBySlug = async (slug: string) => {
  * Mendapatkan detail artikel berdasarkan ID
  * Berguna untuk pengecekan internal di Controller (Update/Delete)
  */
-export const getArtikelById = async (id: number) => {
+export const getArtikelById = async (id: string) => {
   return await prisma.artikel.findUnique({
     where: { 
       id 
@@ -154,7 +154,7 @@ export const getArtikelById = async (id: number) => {
 /**
  * 4. UPDATE ARTIKEL
  */
-export const updateArtikel = async (id: number, data: Prisma.ArtikelUncheckedUpdateInput) => {
+export const updateArtikel = async (id: string, data: Prisma.ArtikelUncheckedUpdateInput) => {
   const existing = await prisma.artikel.findUnique({where: {id}});
   if (!existing) throw new Error('Artikel tidak ditemukan');
 
@@ -187,13 +187,13 @@ export const updateArtikel = async (id: number, data: Prisma.ArtikelUncheckedUpd
 /**
  * 5. DELETE ARTIKEL
  */
-export const deleteArtikel = async (id: number) => {
+export const deleteArtikel = async (id: string) => {
   return await prisma.artikel.delete({
     where: { id }
   });
 };
 
-export const updateStatus = async (id: number, status: 'DRAFT' | 'PUBLISHED') => {
+export const updateStatus = async (id: string, status: 'DRAFT' | 'PUBLISHED') => {
   return await prisma.artikel.update({
     where: { id },
     data: { status },
@@ -218,7 +218,7 @@ export const countPublicArtikels = async (search?: string) => {
 /**
  * Menghitung total artikel milik Admin tertentu
  */
-export const countAdminArtikels = async (authorId: number, search?: string) => {
+export const countAdminArtikels = async (authorId: string, search?: string) => {
   return await prisma.artikel.count({
     where: {
       authorId,

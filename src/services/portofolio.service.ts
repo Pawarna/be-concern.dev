@@ -9,7 +9,7 @@ const getAllPortofolios = async () => {
     });
 }
 
-const getPortofolioById = async (id: number) => {
+const getPortofolioById = async (id: string) => {
     return await prisma.portofolio.findFirst({
         where: {
             id
@@ -39,7 +39,7 @@ const createPortofolio = async (data: Omit<Portofolio, 'id' | 'createdAt' | 'upd
     });
 }
 
-const deleteProtofolio = async (id: number) => {
+const deleteProtofolio = async (id: string) => {
     return await prisma.portofolio.delete({
         where: {
             id
@@ -47,7 +47,7 @@ const deleteProtofolio = async (id: number) => {
     })
 }
 
-const updatePortofolio = async (id: number, data: Omit<Portofolio, 'id' | 'createdAt' | 'updatedAt'>) => {
+const updatePortofolio = async (id: string, data: Omit<Portofolio, 'id' | 'createdAt' | 'updatedAt'>) => {
     return await prisma.portofolio.update({
         where: {
             id
