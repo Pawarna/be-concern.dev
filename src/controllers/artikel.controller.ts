@@ -24,7 +24,10 @@ export const create = async (req: Request, res: Response) => {
     
     return sendSuccess(res, {...result}, "Artikel berhasil dibuat", 201);
   } catch (error: any) {
-    return sendError(res);
+     return res.status(500).json({
+    message: "Internal Server Error",
+    error: String(error),
+  });
   }
 };
 
