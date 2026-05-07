@@ -7,26 +7,32 @@ import { sendError, sendSuccess } from "../utils/response";
 const JWT_SECRET = process.env.JWT_SECRET || 'rahasia_ilahi_123';
 
 export const login = async (req: Request, res: Response) => {
-    const {username, password} = req.body;
+    const { username, password } = req.body;
 
     try {
         const admin = await prisma.admin.findFirst({
-            where: {
-                username
-            }
+            where: { username }
         });
 
-        if (!admin || await bcrypt.compare(password, admin.password)){
-            return sendError(res, "Username or Password wrong.", 401)
+        // 1. Cek apakah user ada
+        if (!admin) {
+            return sendError(res, "Username or Password wrong.", 401);
         }
 
-        const token = jwt.sign({id: admin.id, username: admin.username}, JWT_SECRET, {
-            expiresIn: '8h',
-        })
+        // 2. Cek apakah password cocok
+        const isPasswordValid = await bcrypt.compare(password, admin.password);
+        if (!isPasswordValid) {
+            return sendError(res, "Username or Password wrong.", 401);
+        }
 
-        return sendSuccess(res, {token}, "Login success", 200);
+        // Jika sampai sini, berarti user ada dan password benar
+        const token = jwt.sign({ id: admin.id, username: admin.username }, JWT_SECRET, {
+            expiresIn: '8h',
+        });
+
+        return sendSuccess(res, { token }, "Login success", 200);
         
     } catch (error) {
-        sendError(res)
+        return sendError(res, "Internal Server Error", 500);
     }
 }

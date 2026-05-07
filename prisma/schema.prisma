@@ -33,7 +33,7 @@ model Tag {
 model Admin {
   id       String    @id @default(cuid())
   username String    @unique
-  password String
+  password String    @db.Text
   artikels Artikel[]
 }
 
