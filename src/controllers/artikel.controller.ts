@@ -64,7 +64,10 @@ export const getPublicArtikels = async (req: Request, res: Response) => {
 
     return sendSuccess(res, responsePayload, undefined, 200);
   } catch (error: any) {
-    return sendError(res);
+     return res.status(500).json({
+    message: "Internal Server Error",
+    error: String(error),
+  });
   }
 };
 
