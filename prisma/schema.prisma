@@ -10,11 +10,11 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
 }
 
 model Portofolio {
-  id          Int      @id @default(autoincrement())
+  id        String      @id @default(cuid())
   title       String
   description String
   imageUrl    String
@@ -25,13 +25,13 @@ model Portofolio {
 }
 
 model Tag {
-  id          Int          @id @default(autoincrement())
+  id        String          @id @default(cuid())
   name        String       @unique
   portofolios Portofolio[]
 }
 
 model Admin {
-  id       Int    @id @default(autoincrement())
+  id     String    @id @default(cuid())
   username String @unique
   password String
   artikels Artikel[]
@@ -43,22 +43,22 @@ enum StatusArtikel {
 }
 
 model Artikel {
-  id    Int    @id @default(autoincrement())
+  id  String    @id @default(cuid())
   title String
   slug  String @unique
   content Json
   thumbnail String
   status StatusArtikel
   author Admin  @relation(fields: [authorId], references: [id])
-  authorId Int
+  authorId String
   category Category? @relation(fields: [categoryId], references: [id])
-  categoryId Int?
+  categoryId String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Category {
-  id    Int    @id @default(autoincrement())
+  id    String    @id @default(cuid())
   name  String @unique
   slug  String @unique
   artikels Artikel[]
