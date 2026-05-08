@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { upload } from '../middlewares/upload.middleware';
 import { sendError, sendSuccess } from '../utils/response';
-import { formatImageUrl } from '../utils/urlHelper';
 
 const router = Router();
 
@@ -10,8 +9,7 @@ router.post('/', upload.single('file'), (req, res) => {
         return sendError(res, 'No file uploaded', 400);
     }
 
-    const imageUrl = formatImageUrl(req, `/uploads/${req.file.filename}`);
-    sendSuccess(res, { url: imageUrl }, "File uploaded successfully", 201);
+    sendSuccess(res, { url: req.file }, "File uploaded successfully", 201);
 });
 
 export default router; 
